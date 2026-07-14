@@ -103,6 +103,7 @@ func (h *httpForwarder) Close() error {
 type TCPEntryPoints map[string]*TCPEntryPoint
 
 // NewTCPEntryPoints creates a new TCPEntryPoints.
+// tcp 服务启动的地方, 外部网络数据就是通过entry point 进入的
 func NewTCPEntryPoints(entryPointsConfig static.EntryPoints, hostResolverConfig *types.HostResolverConfig, metricsRegistry metrics.Registry) (TCPEntryPoints, error) {
 	// 将需要发布的信息注册到全局信息表中
 	if os.Getenv(debugConnectionEnv) != "" {
@@ -128,6 +129,7 @@ func NewTCPEntryPoints(entryPointsConfig static.EntryPoints, hostResolverConfig 
 
 		ctx := log.With().Str(logs.EntryPointName, entryPointName).Logger().WithContext(context.Background())
 
+		// 每次打开一次连接, 都将对应的操作添加到全局的gauge中,方便prometheus进行监控
 		openConnectionsGauge := metricsRegistry.
 			OpenConnectionsGauge().
 			With("entrypoint", entryPointName, "protocol", "TCP")
