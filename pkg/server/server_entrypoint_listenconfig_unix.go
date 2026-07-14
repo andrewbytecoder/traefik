@@ -24,6 +24,7 @@ func newListenConfig(configuration *static.EntryPoint) (lc net.ListenConfig) {
 // on the socket.
 func controlReusePort(network, address string, c syscall.RawConn) error {
 	var setSockOptErr error
+	// 设置端口重用
 	err := c.Control(func(fd uintptr) {
 		// Note that net.ListenConfig enables unix.SO_REUSEADDR by default,
 		// as seen in https://go.dev/src/net/sockopt_linux.go. Therefore, no
