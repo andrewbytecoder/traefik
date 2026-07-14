@@ -189,8 +189,10 @@ type TCPEntryPoint struct {
 
 // NewTCPEntryPoint creates a new TCPEntryPoint.
 func NewTCPEntryPoint(ctx context.Context, name string, config *static.EntryPoint, hostResolverConfig *types.HostResolverConfig, openConnectionsGauge gokitmetrics.Gauge) (*TCPEntryPoint, error) {
+	// 创建conn tracker
 	tracker := newConnectionTracker(openConnectionsGauge)
 
+	// 创建网络监听器
 	listener, err := buildListener(ctx, name, config)
 	if err != nil {
 		return nil, fmt.Errorf("building listener: %w", err)
