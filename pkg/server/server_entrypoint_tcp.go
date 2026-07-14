@@ -104,19 +104,24 @@ type TCPEntryPoints map[string]*TCPEntryPoint
 
 // NewTCPEntryPoints creates a new TCPEntryPoints.
 func NewTCPEntryPoints(entryPointsConfig static.EntryPoints, hostResolverConfig *types.HostResolverConfig, metricsRegistry metrics.Registry) (TCPEntryPoints, error) {
+	// 将需要发布的信息注册到全局信息表中
 	if os.Getenv(debugConnectionEnv) != "" {
+		// expvar 一旦注册，会永久注入全局内存
 		expvar.Publish("clientConnectionStates", expvar.Func(func() any {
 			return clientConnectionStates
 		}))
 	}
 
+	// . 这里需要根据配置文件中的协议类型进行过滤，只保留tcp协议的entrypoint
 	serverEntryPointsTCP := make(TCPEntryPoints)
 	for entryPointName, config := range entryPointsConfig {
+		// 获取协议类型
 		protocol, err := config.GetProtocol()
 		if err != nil {
 			return nil, fmt.Errorf("error while building entryPoint %s: %w", entryPointName, err)
 		}
 
+		// 这里只处理tcp协议的entrypoint
 		if protocol != "tcp" {
 			continue
 		}
@@ -167,6 +172,7 @@ func (eps TCPEntryPoints) Switch(routersTCP map[string]*tcprouter.Router) {
 }
 
 // TCPEntryPoint is the TCP server.
+// 使用代理模式和策略模式，因为EntryPoints是可以配置的，所以需要使用策略模式来实现
 type TCPEntryPoint struct {
 	listener               net.Listener
 	switcher               *tcp.HandlerSwitcher

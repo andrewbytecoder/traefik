@@ -4,6 +4,8 @@ import (
 	"net"
 )
 
+// 代理和策略模式，在运行过程中能替换实际的handler
+
 // Handler is the TCP Handlers interface.
 type Handler interface {
 	ServeTCP(conn WriteCloser)
