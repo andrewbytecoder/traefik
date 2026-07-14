@@ -57,6 +57,7 @@ func main() {
 
 	loaders := []cli.ResourceLoader{&tcli.DeprecationLoader{}, &tcli.FileLoader{}, &tcli.FlagLoader{}, &tcli.EnvLoader{}}
 
+	// 按照顺序,最后一只执行默认命令
 	cmdTraefik := &cli.Command{
 		Name: "traefik",
 		Description: `Traefik is a modern HTTP reverse proxy and load balancer made to deploy microservices with ease.
@@ -68,12 +69,13 @@ Complete documentation is available at https://traefik.io`,
 		},
 	}
 
+	// 添加健康检查字命令
 	err := cmdTraefik.AddCommand(healthcheck.NewCmd(&tConfig.Configuration, loaders))
 	if err != nil {
 		stdlog.Println(err)
 		os.Exit(1)
 	}
-
+	// 添加version 字命令，用来查看当前traefik的版本
 	err = cmdTraefik.AddCommand(cmdVersion.NewCmd())
 	if err != nil {
 		stdlog.Println(err)
@@ -90,9 +92,11 @@ Complete documentation is available at https://traefik.io`,
 }
 
 func runCmd(staticConfiguration *static.Configuration) error {
+	// 接收到信号时，取消上下文，可以注册任意信号
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
+	// 设置日志
 	if err := setupLogger(ctx, staticConfiguration); err != nil {
 		return fmt.Errorf("setting up logger: %w", err)
 	}
@@ -102,6 +106,8 @@ func runCmd(staticConfiguration *static.Configuration) error {
 		"it is recommended to set these options to `false` to avoid split-view situation." +
 		"Refer to the documentation for more details: https://doc.traefik.io/traefik/v3.7/migrate/v3/#encoded-characters-configuration-default-values")
 
+	// 设置代理，默认就是这样，这里这样写是为了确保在使用环境变量时，可以覆盖这个值
+	// 在进行http https请求的时候，能够使用系统环境变量中的http_proxy和https_proxy代理
 	http.DefaultTransport.(*http.Transport).Proxy = http.ProxyFromEnvironment
 
 	staticConfiguration.SetEffectiveConfiguration()

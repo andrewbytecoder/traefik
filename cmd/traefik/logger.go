@@ -69,6 +69,8 @@ func setupLogger(ctx context.Context, staticConfiguration *static.Configuration)
 
 func getLogWriter(staticConfiguration *static.Configuration) io.Writer {
 	var w io.Writer = os.Stdout
+
+	// 使用lumberjack来管理日志大小和压缩
 	if staticConfiguration.Log != nil && len(staticConfiguration.Log.FilePath) > 0 {
 		_, _ = os.OpenFile(staticConfiguration.Log.FilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 		w = &lumberjack.Logger{
