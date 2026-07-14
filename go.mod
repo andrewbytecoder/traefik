@@ -128,6 +128,11 @@ require (
 require github.com/go-acme/lego/v4 v4.35.2
 
 require (
+	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/ugorji/go/codec v1.2.11 // indirect
+)
+
+require (
 	cloud.google.com/go/auth v0.20.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
@@ -199,7 +204,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/gin-gonic/gin v1.9.1 // indirect
+	github.com/gin-gonic/gin v1.9.1
 	github.com/go-acme/alidns-20150109/v5 v5.4.1 // indirect
 	github.com/go-acme/esa-20240910/v3 v3.2.2 // indirect
 	github.com/go-acme/jdcloud-sdk-go v1.64.0 // indirect

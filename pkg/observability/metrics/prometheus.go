@@ -95,6 +95,7 @@ func RegisterPrometheus(ctx context.Context, config *otypes.Prometheus) Registry
 		}
 	}
 
+	// 将所有指标都注入到prometheus进行抓取
 	if !registerPromState(ctx) {
 		return nil
 	}
@@ -271,6 +272,7 @@ func initStandardRegistry(config *otypes.Prometheus) Registry {
 }
 
 func registerPromState(ctx context.Context) bool {
+	// 将所有
 	err := promRegistry.Register(promState)
 	if err == nil {
 		return true

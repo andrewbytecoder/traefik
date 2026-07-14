@@ -175,6 +175,7 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 	providerAggregator := aggregator.NewProviderAggregator(*staticConfiguration.Providers)
 
 	ctx := context.Background()
+	// 创建协程池
 	routinesPool := safe.NewPool(ctx)
 
 	// adds internal provider
@@ -629,6 +630,7 @@ func checkNewVersion(staticConfiguration *static.Configuration) {
 
 		ticker := time.Tick(24 * time.Hour)
 		safe.Go(func() {
+			// 首次 10 分钟,后面每隔24小时进行一次版本更新检查
 			for time.Sleep(10 * time.Minute); ; <-ticker {
 				version.CheckNewVersion()
 			}
@@ -663,6 +665,7 @@ More details on: https://doc.traefik.io/traefik/contributing/data-collection/
 func collect(staticConfiguration *static.Configuration) {
 	ticker := time.Tick(24 * time.Hour)
 	safe.Go(func() {
+		// 版本信息收集
 		for time.Sleep(10 * time.Minute); ; <-ticker {
 			if err := collector.Collect(staticConfiguration); err != nil {
 				log.Debug().Err(err).Send()
