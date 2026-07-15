@@ -198,6 +198,7 @@ func NewTCPEntryPoint(ctx context.Context, name string, config *static.EntryPoin
 		return nil, fmt.Errorf("building listener: %w", err)
 	}
 
+	// 创建路由
 	rt, err := tcprouter.NewRouter(nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating TCP router: %w", err)
@@ -205,6 +206,7 @@ func NewTCPEntryPoint(ctx context.Context, name string, config *static.EntryPoin
 
 	reqDecorator := requestdecorator.New(hostResolverConfig)
 
+	// 创建http服务器
 	httpServer, err := newHTTPServer(ctx, listener, config, true, reqDecorator)
 	if err != nil {
 		return nil, fmt.Errorf("creating HTTP server: %w", err)
@@ -525,6 +527,7 @@ func buildListener(ctx context.Context, name string, config *static.EntryPoint) 
 
 	listener = tcpKeepAliveListener{listener.(*net.TCPListener)}
 
+	// 使用代理，保证就算在k8s或者nginx后面也能正常运行
 	if config.ProxyProtocol != nil {
 		listener, err = buildProxyProtocolListener(ctx, config, listener)
 		if err != nil {
@@ -640,6 +643,8 @@ func newHTTPServer(ctx context.Context, ln net.Listener, configuration *static.E
 
 	httpSwitcher := middlewares.NewHandlerSwitcher(http.NotFoundHandler())
 
+	// alice 一个中间调用链实现
+	// 内部使用函数回调,一层一层将调用链进行封装, 最终形成一个层层嵌套的调用过程
 	next, err := alice.New(requestdecorator.WrapHandler(reqDecorator)).Then(httpSwitcher)
 	if err != nil {
 		return nil, err

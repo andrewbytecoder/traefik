@@ -53,6 +53,7 @@ func MatchDomain(domain, certDomain string) bool {
 }
 
 // CanonicalDomain returns a lower case domain with trim space.
+// CanonicalDomain 将域名转换为小写并去除空格， 规范化 domain 名称
 func CanonicalDomain(domain string) string {
 	return strings.ToLower(strings.TrimSpace(domain))
 }

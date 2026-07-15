@@ -36,6 +36,7 @@ func New(hostResolverConfig *types.HostResolverConfig) *RequestDecorator {
 }
 
 func (r *RequestDecorator) ServeHTTP(rw http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+	// 将 host 去掉空格大写全部转换为小写
 	host := types.CanonicalDomain(parseHost(req.Host))
 	reqt := req.WithContext(context.WithValue(req.Context(), canonicalKey, host))
 
