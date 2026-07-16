@@ -630,6 +630,9 @@ type httpServer struct {
 	Switcher  *middlewares.HTTPHandlerSwitcher
 }
 
+// 这段代码的核心逻辑是：将层层包装好的 HTTP handler 注入 http.Server，配置协议版本、超时、HTTP/2 等参数，
+// 然后用 httpForwarder + httpSwitcher 组合模式在 goroutine 中异步启动 HTTP 服务，
+// 最后把 Server、Listener、Switcher 封装成一个统一的结构体返回给上层管理。
 func newHTTPServer(ctx context.Context, ln net.Listener, configuration *static.EntryPoint, withH2c bool, reqDecorator *requestdecorator.RequestDecorator) (*httpServer, error) {
 	if configuration.HTTP2.MaxConcurrentStreams < 0 {
 		return nil, errors.New("max concurrent streams value must be greater than or equal to zero")
@@ -668,17 +671,22 @@ func newHTTPServer(ctx context.Context, ln net.Listener, configuration *static.E
 	}
 
 	var protocols http.Protocols
+	// 启用http1
 	protocols.SetHTTP1(true)
+	// 启用http2
 	protocols.SetHTTP2(true)
 
 	// With the addition of UnencryptedHTTP2 in http.Server#Protocols in go1.24 setting the h2c handler is not necessary anymore.
+	// 根据配置，启用h2c，非tls链接
 	protocols.SetUnencryptedHTTP2(withH2c)
 
 	handler = contenttype.DisableAutoDetection(handler)
 
 	if configuration.HTTP.EncodeQuerySemicolons {
+		// 将分号编码为%3B
 		handler = encodeQuerySemicolons(handler)
 	} else {
+		// 允许分号
 		handler = http.AllowQuerySemicolons(handler)
 	}
 
@@ -743,7 +751,7 @@ func newHTTPServer(ctx context.Context, ln net.Listener, configuration *static.E
 
 	serverHTTP := &http.Server{
 		Protocols:      &protocols,
-		Handler:        handler,
+		Handler:        handler, // 这是一个被层层包含的中间件。当有数据的情况下会层层递进的查找对应的处理函数
 		ErrorLog:       stdlog.New(logs.NoLevel(log.Logger, zerolog.DebugLevel), "", 0),
 		ReadTimeout:    time.Duration(configuration.Transport.RespondingTimeouts.ReadTimeout),
 		WriteTimeout:   time.Duration(configuration.Transport.RespondingTimeouts.WriteTimeout),

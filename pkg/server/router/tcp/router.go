@@ -57,6 +57,7 @@ type Router struct {
 }
 
 // NewRouter returns a new TCP router.
+// providersPrecedence is a list of providers names in the order of precedence.
 func NewRouter(providersPrecedence []string) (*Router, error) {
 	muxTCP, err := tcpmuxer.NewMuxer(providersPrecedence)
 	if err != nil {
