@@ -43,6 +43,7 @@ func NewManagerFactory(staticConfiguration static.Configuration, routinesPool *s
 	}
 
 	if staticConfiguration.API != nil {
+		// 添加api路由
 		apiRouterBuilder := api.NewBuilder(staticConfiguration, tlsManager)
 
 		if staticConfiguration.API.Dashboard {

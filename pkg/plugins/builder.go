@@ -37,6 +37,7 @@ func NewBuilder(manager *Manager, plugins map[string]Descriptor, localPlugins ma
 	}
 
 	for pName, desc := range plugins {
+		// 读取插件的manifest文件
 		manifest, err := manager.ReadManifest(desc.ModuleName)
 		if err != nil {
 			_ = manager.ResetAll()

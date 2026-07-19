@@ -12,12 +12,15 @@ import (
 )
 
 // GetUDPRoutersByEntryPoints returns all the UDP routers by entry points name and routers name.
+// 获取所有entrypoint对应的udp router
 func (c *Configuration) GetUDPRoutersByEntryPoints(ctx context.Context, entryPoints []string) map[string]map[string]*UDPRouterInfo {
+	// 创建一个map，key为entrypoint名称，value为map[string]*UDPRouterInfo，用于存储entrypoint对应的udp router
 	entryPointsRouters := make(map[string]map[string]*UDPRouterInfo)
 
 	for rtName, rt := range c.UDPRouters {
 		logger := log.Ctx(ctx).With().Str(logs.RouterName, rtName).Logger()
 
+		// 如果配置信息中没有entrypoint，则使用默认的entrypoint
 		eps := rt.EntryPoints
 		if len(eps) == 0 {
 			logger.Debug().Msgf("No entryPoint defined for this router, using the default one(s) instead: %+v", entryPoints)
@@ -26,6 +29,7 @@ func (c *Configuration) GetUDPRoutersByEntryPoints(ctx context.Context, entryPoi
 
 		entryPointsCount := 0
 		for _, entryPointName := range eps {
+			// 如果entrypoint不存在，则记录错误信息，并跳过该entrypoint
 			if !slices.Contains(entryPoints, entryPointName) {
 				rt.AddError(fmt.Errorf("entryPoint %q doesn't exist", entryPointName), false)
 				logger.Error().Str(logs.EntryPointName, entryPointName).
@@ -33,6 +37,7 @@ func (c *Configuration) GetUDPRoutersByEntryPoints(ctx context.Context, entryPoi
 				continue
 			}
 
+			// 如果entrypoint对应的udp router不存在，则创建一个空的map[string]*UDPRouterInfo
 			if _, ok := entryPointsRouters[entryPointName]; !ok {
 				entryPointsRouters[entryPointName] = make(map[string]*UDPRouterInfo)
 			}
@@ -40,6 +45,7 @@ func (c *Configuration) GetUDPRoutersByEntryPoints(ctx context.Context, entryPoi
 			entryPointsCount++
 			rt.Using = append(rt.Using, entryPointName)
 
+			// rtName 运行时的名字
 			entryPointsRouters[entryPointName][rtName] = rt
 		}
 
@@ -84,6 +90,7 @@ func (r *UDPRouterInfo) AddError(err error, critical bool) {
 }
 
 // UDPServiceInfo holds information about a currently running UDP service.
+// udp 服务器，当routers多的时候，分别分配给不同的udp服务器
 type UDPServiceInfo struct {
 	*dynamic.UDPService // dynamic configuration
 

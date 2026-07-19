@@ -22,6 +22,7 @@ import (
 )
 
 // RouterFactory the factory of TCP/UDP routers.
+// 路由工厂
 type RouterFactory struct {
 	entryPointsTCP []string
 	entryPointsUDP []string
@@ -98,6 +99,7 @@ func NewRouterFactory(staticConfiguration static.Configuration, managerFactory *
 }
 
 // CreateRouters creates new TCPRouters and UDPRouters.
+// 路由工厂
 func (f *RouterFactory) CreateRouters(rtConf *runtime.Configuration) (map[string]*tcprouter.Router, map[string]udp.Handler) {
 	if f.cancelPrevState != nil {
 		f.cancelPrevState()
@@ -107,8 +109,9 @@ func (f *RouterFactory) CreateRouters(rtConf *runtime.Configuration) (map[string
 	ctx, f.cancelPrevState = context.WithCancel(context.Background())
 
 	// HTTP
+	// 创建服务管理器和路由管理器
 	serviceManager := f.managerFactory.Build(rtConf)
-
+	// 创建中间件管理器
 	middlewaresBuilder := middleware.NewBuilder(rtConf.Middlewares, serviceManager, f.pluginBuilder)
 
 	serviceManager.SetMiddlewareChainBuilder(middlewaresBuilder)
@@ -139,8 +142,10 @@ func (f *RouterFactory) CreateRouters(rtConf *runtime.Configuration) (map[string
 	svcTCPManager.LaunchHealthCheck(ctx)
 
 	// UDP
+	// 创建 udp 服务管理器和路由管理器
 	svcUDPManager := udpsvc.NewManager(rtConf)
 	rtUDPManager := udprouter.NewManager(rtConf, svcUDPManager)
+	// 创建udp 路由
 	routersUDP := rtUDPManager.BuildHandlers(ctx, f.entryPointsUDP)
 
 	rtConf.PopulateUsedBy()

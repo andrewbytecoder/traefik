@@ -16,8 +16,10 @@ type UDPConfiguration struct {
 
 // UDPService defines the configuration for a UDP service. All fields are mutually exclusive.
 type UDPService struct {
+	// 直接指定后端地址列表
 	LoadBalancer *UDPServersLoadBalancer `json:"loadBalancer,omitempty" toml:"loadBalancer,omitempty" yaml:"loadBalancer,omitempty" export:"true"`
-	Weighted     *UDPWeightedRoundRobin  `json:"weighted,omitempty" toml:"weighted,omitempty" yaml:"weighted,omitempty" label:"-" export:"true"`
+	// 引用其他service并按照权重进行加权处理
+	Weighted *UDPWeightedRoundRobin `json:"weighted,omitempty" toml:"weighted,omitempty" yaml:"weighted,omitempty" label:"-" export:"true"`
 }
 
 // Merge merges another UDPService into this one.
@@ -107,6 +109,7 @@ func (l *UDPServersLoadBalancer) mergeable(loadBalancer *UDPServersLoadBalancer)
 // +k8s:deepcopy-gen=true
 
 // UDPServer defines a UDP server configuration.
+// port字段不会参与序列化和反序列化
 type UDPServer struct {
 	Address string `json:"address,omitempty" toml:"address,omitempty" yaml:"address,omitempty" label:"-"`
 	Port    string `json:"-" toml:"-" yaml:"-" file:"-"`

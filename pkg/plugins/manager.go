@@ -50,12 +50,14 @@ type Manager struct {
 
 // NewManager creates a new Traefik plugins manager.
 func NewManager(downloader PluginDownloader, opts ManagerOptions) (*Manager, error) {
+	// opts.Output 插件输出目录
+	// FromSlash 将分隔符转化为具体系统的分隔符，比如windows是\，linux是/
 	sourcesRootPath := filepath.Join(filepath.FromSlash(opts.Output), sourcesFolder)
 	err := resetDirectory(sourcesRootPath)
 	if err != nil {
 		return nil, err
 	}
-
+	// 目录创建是随机的，根据后面指定的正则表达式格式进行创建
 	goPath, err := os.MkdirTemp(sourcesRootPath, "gop-*")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GoPath: %w", err)
@@ -93,7 +95,7 @@ func (m *Manager) InstallPlugin(ctx context.Context, plugin Descriptor) error {
 			return fmt.Errorf("unable to check archive integrity of the plugin %s: %w", plugin.ModuleName, err)
 		}
 	}
-
+	// 安装过程就是将插件下载下来放到本地
 	if err = m.unzip(plugin.ModuleName, plugin.Version); err != nil {
 		return fmt.Errorf("unable to unzip plugin %s: %w", plugin.ModuleName, err)
 	}
@@ -163,6 +165,7 @@ func (m *Manager) CleanArchives(plugins map[string]Descriptor) error {
 }
 
 // WriteState writes the plugins state files.
+// 将插件的状态写写到stateFile中
 func (m *Manager) WriteState(plugins map[string]Descriptor) error {
 	state := make(map[string]string)
 

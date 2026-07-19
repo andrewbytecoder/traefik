@@ -31,10 +31,13 @@ func NewManager(conf *runtime.Configuration,
 
 // BuildHandlers builds the handlers for the given entrypoints.
 func (m *Manager) BuildHandlers(rootCtx context.Context, entryPoints []string) map[string]udp.Handler {
+	// 获取所有entrypoint对应的udp router
 	entryPointsRouters := m.getUDPRouters(rootCtx, entryPoints)
 
 	entryPointHandlers := make(map[string]udp.Handler)
 	for _, entryPointName := range entryPoints {
+		//  map[string]map[string]*runtime.UDPRouterInfo
+		// 一个enpoints 对应多个routers 每个traefik 可能启动多个eps
 		routers := entryPointsRouters[entryPointName]
 
 		logger := log.Ctx(rootCtx).With().Str(logs.EntryPointName, entryPointName).Logger()
@@ -44,9 +47,11 @@ func (m *Manager) BuildHandlers(rootCtx context.Context, entryPoints []string) m
 			logger.Warn().Msg("Config has more than one udp router for a given entrypoint.")
 		}
 
+		// 构建entrypoint对应的handler
 		handlers := m.buildEntryPointHandlers(ctx, routers)
 
 		if len(handlers) > 0 {
+			// udp 没有路由规则,因此在进行路由的时候其实是 一个handler
 			// As UDP support only one router per entrypoint, we only take the first one.
 			entryPointHandlers[entryPointName] = handlers[0]
 		}
@@ -55,6 +60,7 @@ func (m *Manager) BuildHandlers(rootCtx context.Context, entryPoints []string) m
 }
 
 func (m *Manager) getUDPRouters(ctx context.Context, entryPoints []string) map[string]map[string]*runtime.UDPRouterInfo {
+	// 如果配置信息不为空，则获取所有entrypoint对应的udp router
 	if m.conf != nil {
 		return m.conf.GetUDPRoutersByEntryPoints(ctx, entryPoints)
 	}
@@ -64,10 +70,12 @@ func (m *Manager) getUDPRouters(ctx context.Context, entryPoints []string) map[s
 
 func (m *Manager) buildEntryPointHandlers(ctx context.Context, configs map[string]*runtime.UDPRouterInfo) []udp.Handler {
 	var rtNames []string
+	// 按名称排序
 	for routerName := range configs {
 		rtNames = append(rtNames, routerName)
 	}
 
+	// 这里按照名称进行排序
 	sort.Slice(rtNames, func(i, j int) bool {
 		return rtNames[i] > rtNames[j]
 	})
@@ -75,17 +83,20 @@ func (m *Manager) buildEntryPointHandlers(ctx context.Context, configs map[strin
 	var handlers []udp.Handler
 
 	for _, routerName := range rtNames {
+		// 按照名字顺序取出对应的路由信息
 		routerConfig := configs[routerName]
 		logger := log.Ctx(ctx).With().Str(logs.RouterName, routerName).Logger()
+		// 添加到context中
 		ctxRouter := logger.WithContext(provider.AddInContext(ctx, routerName))
 
+		// 必须配置service
 		if routerConfig.Service == "" {
 			err := errors.New("the service is missing on the udp router")
 			routerConfig.AddError(err, true)
 			logger.Error().Err(err).Send()
 			continue
 		}
-
+		// 构建udp handler 这里的handler可能已经是经过lb的handler
 		handler, err := m.serviceManager.BuildUDP(ctxRouter, routerConfig.Service)
 		if err != nil {
 			routerConfig.AddError(err, true)

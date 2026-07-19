@@ -19,6 +19,7 @@ func NewProxy(address string) (*Proxy, error) {
 }
 
 // ServeUDP implements the Handler interface.
+// 一次会话只会复制一次，直到会话出错或者超时
 func (p *Proxy) ServeUDP(conn *Conn) {
 	log.Debug().Msgf("Handling UDP stream from %s to %s", conn.rAddr, p.target)
 

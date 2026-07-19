@@ -14,6 +14,7 @@ const localGoPath = "./plugins-local/"
 
 // SetupRemotePlugins setup remote plugins environment.
 func SetupRemotePlugins(manager *Manager, plugins map[string]Descriptor) error {
+	// 检查插件配置
 	err := checkRemotePluginsConfiguration(plugins)
 	if err != nil {
 		return fmt.Errorf("invalid configuration: %w", err)
@@ -29,6 +30,7 @@ func SetupRemotePlugins(manager *Manager, plugins map[string]Descriptor) error {
 	for pAlias, desc := range plugins {
 		log.Ctx(ctx).Debug().Msgf("Installing plugin: %s: %s@%s", pAlias, desc.ModuleName, desc.Version)
 
+		// 将插件压缩包下载到本地并进行安装
 		if err = manager.InstallPlugin(ctx, desc); err != nil {
 			_ = manager.ResetAll()
 			return fmt.Errorf("unable to install plugin %s: %w", pAlias, err)
@@ -110,6 +112,7 @@ func SetupLocalPlugins(plugins map[string]LocalDescriptor) error {
 }
 
 func checkLocalPluginManifest(descriptor LocalDescriptor) error {
+	// 读取插件的manifest文件 插件的元数据
 	m, err := ReadManifest(localGoPath, descriptor.ModuleName)
 	if err != nil {
 		return err
@@ -132,6 +135,8 @@ func checkLocalPluginManifest(descriptor LocalDescriptor) error {
 		errs = append(errs, fmt.Errorf("%s: unsupported type %q", descriptor.ModuleName, m.Type))
 	}
 
+	// 检查yaegi插件的import是否合法
+	// 代码解释型插件
 	if m.IsYaegiPlugin() {
 		if m.Import == "" {
 			errs = append(errs, fmt.Errorf("%s: missing import", descriptor.ModuleName))

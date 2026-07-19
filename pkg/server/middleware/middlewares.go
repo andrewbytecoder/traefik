@@ -48,8 +48,8 @@ import (
 // Builder the middleware builder.
 type Builder struct {
 	configs        map[string]*runtime.MiddlewareInfo
-	pluginBuilder  PluginsBuilder
-	serviceBuilder serviceBuilder
+	pluginBuilder  PluginsBuilder // 插件管理器
+	serviceBuilder serviceBuilder // 服务管理器
 }
 
 type serviceBuilder interface {

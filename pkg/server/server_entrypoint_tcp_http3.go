@@ -94,6 +94,7 @@ func newHTTP3Server(ctx context.Context, name string, config *static.EntryPoint,
 }
 
 func (e *http3server) Start() error {
+	// Server 继承来自  http3.Server
 	return e.Serve(e.http3conn)
 }
 

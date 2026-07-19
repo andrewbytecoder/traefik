@@ -129,6 +129,7 @@ func runCmd(staticConfiguration *static.Configuration) error {
 
 	stats(staticConfiguration)
 
+	// 设置服务器
 	svr, err := setupServer(staticConfiguration)
 	if err != nil {
 		return err
@@ -137,7 +138,7 @@ func runCmd(staticConfiguration *static.Configuration) error {
 	if staticConfiguration.Ping != nil {
 		staticConfiguration.Ping.WithContext(ctx)
 	}
-
+	// 启动服务器
 	svr.Start(ctx)
 	defer svr.Close()
 
@@ -287,6 +288,7 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 		log.Info().Str("workloadAPIAddr", staticConfiguration.Spiffe.WorkloadAPIAddr).
 			Msg("Waiting on SPIFFE SVID delivery")
 
+		// 证书获取进行认证
 		spiffeX509Source, err = workloadapi.NewX509Source(
 			ctx,
 			workloadapi.WithClientOptions(
@@ -301,8 +303,10 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 		log.Info().Msg("Successfully obtained SPIFFE SVID.")
 	}
 
+	// 创建传输管理器+
 	transportManager := service.NewTransportManager(spiffeX509Source)
 
+	// 创建代理构建器
 	var proxyBuilder service.ProxyBuilder = httputil.NewProxyBuilder(transportManager, semConvMetricRegistry)
 	if staticConfiguration.Experimental != nil && staticConfiguration.Experimental.FastProxy != nil {
 		proxyBuilder = proxy.NewSmartBuilder(transportManager, proxyBuilder, *staticConfiguration.Experimental.FastProxy)
@@ -310,6 +314,7 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 
 	dialerManager := tcp.NewDialerManager(spiffeX509Source)
 	acmeHTTPHandler := getHTTPChallengeHandler(acmeProviders, httpChallengeProvider)
+	// 创建管理工厂
 	managerFactory := service.NewManagerFactory(*staticConfiguration, routinesPool, observabilityMgr, transportManager, proxyBuilder, acmeHTTPHandler, tlsManager)
 
 	// Router factory
@@ -516,6 +521,7 @@ func initTailscaleProviders(cfg *static.Configuration, providerAggregator *aggre
 	return providers
 }
 
+// 从插件市场下载插件
 func registerMetricClients(metricsConfig *otypes.Metrics) []metrics.Registry {
 	if metricsConfig == nil {
 		return nil

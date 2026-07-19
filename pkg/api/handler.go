@@ -64,6 +64,7 @@ type Handler struct {
 }
 
 // NewBuilder returns a http.Handler builder based on runtime.Configuration.
+// 闭包实现 数据封装
 func NewBuilder(staticConfig static.Configuration, tlsManager *tls.Manager) func(*runtime.Configuration) http.Handler {
 	return func(configuration *runtime.Configuration) http.Handler {
 		return New(staticConfig, configuration).WithTLSManager(tlsManager).createRouter()

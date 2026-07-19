@@ -219,6 +219,7 @@ func NewTCPEntryPoint(ctx context.Context, name string, config *static.EntryPoin
 		return nil, fmt.Errorf("creating HTTPS server: %w", err)
 	}
 
+	// 创建quic服务
 	h3Server, err := newHTTP3Server(ctx, name, config, httpsServer)
 	if err != nil {
 		return nil, fmt.Errorf("creating HTTP3 server: %w", err)
@@ -241,10 +242,13 @@ func NewTCPEntryPoint(ctx context.Context, name string, config *static.EntryPoin
 }
 
 // Start starts the TCP server.
+// 这里需要处理tcp协议的entrypoint
 func (e *TCPEntryPoint) Start(ctx context.Context) {
 	logger := log.Ctx(ctx)
 	logger.Debug().Msg("Starting TCP Server")
 
+	// 启动http3服务器
+	// quic 服务器启动
 	if e.http3Server != nil {
 		go func() { _ = e.http3Server.Start() }()
 	}
@@ -253,6 +257,7 @@ func (e *TCPEntryPoint) Start(ctx context.Context) {
 		conn, err := e.listener.Accept()
 		// As the Shutdown method has been called, an error is expected.
 		// Thus, it is not necessary to log it.
+		// 主动shutdown导致的错误并不需要任何处理
 		if err != nil && e.inShutdown.Load() {
 			return
 		}

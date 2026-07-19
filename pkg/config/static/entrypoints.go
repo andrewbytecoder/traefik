@@ -47,11 +47,12 @@ func (ep *EntryPoint) GetAddress() string {
 // GetProtocol returns the protocol part of the address field of the entry point.
 // If none is specified, it defaults to "tcp".
 func (ep *EntryPoint) GetProtocol() (string, error) {
+	// 如果没有指定协议，则默认为tcp协议
 	splitN := strings.SplitN(ep.Address, "/", 2)
 	if len(splitN) < 2 {
 		return "tcp", nil
 	}
-
+	// 不区分大小写
 	protocol := strings.ToLower(splitN[1])
 	if protocol == "tcp" || protocol == "udp" {
 		return protocol, nil

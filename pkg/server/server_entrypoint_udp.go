@@ -19,6 +19,7 @@ type UDPEntryPoints map[string]*UDPEntryPoint
 func NewUDPEntryPoints(config static.EntryPoints) (UDPEntryPoints, error) {
 	entryPoints := make(UDPEntryPoints)
 	for entryPointName, entryPoint := range config {
+		// 这里只处理udp协议的数据
 		protocol, err := entryPoint.GetProtocol()
 		if err != nil {
 			return nil, fmt.Errorf("error while building entryPoint %s: %w", entryPointName, err)
@@ -81,6 +82,7 @@ type UDPEntryPoint struct {
 }
 
 // NewUDPEntryPoint returns a UDP entry point.
+// 每次有请求过来这里就进行代理
 func NewUDPEntryPoint(config *static.EntryPoint, name string) (*UDPEntryPoint, error) {
 	var listener *udp.Listener
 	var err error

@@ -46,6 +46,7 @@ func NewServer(routinesPool *safe.Pool, entryPoints TCPEntryPoints, entryPointsU
 // Start starts the server and Stop/Close it when context is Done.
 func (s *Server) Start(ctx context.Context) {
 	go func() {
+		// 当ctx被取消时，停止服务
 		<-ctx.Done()
 		logger := log.Ctx(ctx)
 		logger.Info().Msg("I have to go...")

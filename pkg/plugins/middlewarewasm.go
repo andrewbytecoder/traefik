@@ -27,6 +27,7 @@ type wasmMiddlewareBuilder struct {
 func newWasmMiddlewareBuilder(goPath, moduleName, wasmPath string, settings Settings) (*wasmMiddlewareBuilder, error) {
 	ctx := context.Background()
 	path := filepath.Join(goPath, "src", moduleName, wasmPath)
+	//  这里需要做一个缓存，避免每次都重新编译
 	cache := wazero.NewCompilationCache()
 
 	code, err := os.ReadFile(path)
