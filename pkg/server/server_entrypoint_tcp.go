@@ -177,9 +177,9 @@ func (eps TCPEntryPoints) Switch(routersTCP map[string]*tcprouter.Router) {
 // 使用代理模式和策略模式，因为EntryPoints是可以配置的，所以需要使用策略模式来实现
 type TCPEntryPoint struct {
 	listener               net.Listener
-	switcher               *tcp.HandlerSwitcher
-	transportConfiguration *static.EntryPointsTransport
-	tracker                *connectionTracker
+	switcher               *tcp.HandlerSwitcher         // tcp 转发器
+	transportConfiguration *static.EntryPointsTransport // 转发配置
+	tracker                *connectionTracker           // 连接跟踪器
 	httpServer             *httpServer
 	httpsServer            *httpServer
 	http3Server            *http3server
@@ -263,11 +263,12 @@ func (e *TCPEntryPoint) Start(ctx context.Context) {
 		}
 		if err != nil {
 			logger.Error().Err(err).Send()
-
+			// 如果是因为系统资源不足，护着  EAGAIN 等相关的错误，等一会会自动进行恢复的错误不需要进行处理
 			if opErr, ok := errors.AsType[*net.OpError](err); ok && opErr.Temporary() {
 				continue
 			}
 
+			// 临时防御性覆盖 url等错误导致的异常现象
 			if urlErr, ok := errors.AsType[*url.Error](err); ok && urlErr.Temporary() {
 				continue
 			}
@@ -287,6 +288,8 @@ func (e *TCPEntryPoint) Start(ctx context.Context) {
 			// Enforce read/write deadlines at the connection level,
 			// because when we're peeking the first byte to determine whether we are doing TLS,
 			// the deadlines at the server level are not taken into account.
+
+			// 设置读写超时
 			if e.transportConfiguration.RespondingTimeouts.ReadTimeout > 0 {
 				err := writeCloser.SetReadDeadline(time.Now().Add(time.Duration(e.transportConfiguration.RespondingTimeouts.ReadTimeout)))
 				if err != nil {
@@ -294,6 +297,7 @@ func (e *TCPEntryPoint) Start(ctx context.Context) {
 				}
 			}
 
+			// 设置写超时
 			if e.transportConfiguration.RespondingTimeouts.WriteTimeout > 0 {
 				err = writeCloser.SetWriteDeadline(time.Now().Add(time.Duration(e.transportConfiguration.RespondingTimeouts.WriteTimeout)))
 				if err != nil {

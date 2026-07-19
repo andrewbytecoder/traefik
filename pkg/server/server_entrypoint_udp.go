@@ -40,6 +40,7 @@ func NewUDPEntryPoints(config static.EntryPoints) (UDPEntryPoints, error) {
 
 // Start commences the listening for all the entry points.
 func (eps UDPEntryPoints) Start() {
+	// udp 进行一对一的通讯，这里有多少udp 的entrypoint，就启动多少个goroutine
 	for entryPointName, ep := range eps {
 		ctx := log.With().Str(logs.EntryPointName, entryPointName).Logger().WithContext(context.Background())
 		go ep.Start(ctx)
