@@ -13,6 +13,7 @@ const display = useDisplay()
 const theme = useTheme()
 const { navSection: hubDemoNavSection } = useHubDemoManifest()
 
+const isRail = computed(() => rail.value && !display.smAndDown.value)
 const pageTitle = computed(() => (typeof route.meta.title === 'string' ? route.meta.title : 'Dashboard'))
 const mergedNavSections = computed(() => [...navSections, hubDemoNavSection.value])
 
@@ -36,7 +37,8 @@ function toggleDrawer() {
   <v-app>
     <v-navigation-drawer
       v-model="drawer"
-      :rail="rail && !display.smAndDown.value"
+      :rail="isRail"
+      :rail-width="72"
       :temporary="display.smAndDown.value"
       width="296"
       color="secondary"
@@ -44,7 +46,7 @@ function toggleDrawer() {
       <div class="drawer-header">
         <div class="brand-lockup">
           <div class="brand-mark">T</div>
-          <div v-if="!rail || display.smAndDown.value" class="brand-copy">
+          <div v-if="!isRail" class="brand-copy">
             <div class="brand-title">Traefik Proxy</div>
             <div class="brand-subtitle">Vue migration shell</div>
           </div>
@@ -53,21 +55,30 @@ function toggleDrawer() {
 
       <div class="drawer-body">
         <template v-for="section in mergedNavSections" :key="section.key">
-          <div v-if="section.label && (!rail || display.smAndDown.value)" class="section-label">
+          <div v-if="section.label && !isRail" class="section-label">
             {{ section.label }}
           </div>
 
-          <v-list nav density="comfortable" bg-color="transparent">
+          <v-list
+            nav
+            density="comfortable"
+            bg-color="transparent"
+            :class="{ 'nav-list--rail': isRail }"
+          >
             <v-list-item
               v-for="item in section.items"
               :key="item.path"
               :to="item.path"
-              :prepend-icon="item.icon"
-              :title="rail && !display.smAndDown.value ? undefined : item.label"
+              :prepend-icon="isRail ? undefined : item.icon"
+              :title="isRail ? undefined : item.label"
               rounded="xl"
               color="primary"
+              :class="{ 'nav-list-item--rail': isRail }"
             >
-              <template v-if="rail && !display.smAndDown.value" #append></template>
+              <template v-if="isRail" #prepend>
+                <v-icon :icon="item.icon" />
+              </template>
+              <template v-if="isRail" #append></template>
             </v-list-item>
           </v-list>
         </template>
@@ -147,6 +158,25 @@ function toggleDrawer() {
 
 .drawer-body {
   padding: 0 0.75rem 1.25rem;
+}
+
+.drawer-body :deep(.nav-list--rail .v-list-item--nav) {
+  padding-inline: 0;
+}
+
+.drawer-body :deep(.nav-list-item--rail) {
+  min-height: 3rem;
+}
+
+.drawer-body :deep(.nav-list-item--rail .v-list-item__prepend) {
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  margin-inline-end: 0;
+}
+
+.drawer-body :deep(.nav-list-item--rail .v-list-item__spacer) {
+  display: none;
 }
 
 .section-label {
