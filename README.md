@@ -157,3 +157,6 @@ The gopher's logo of Traefik is licensed under the Creative Commons 3.0 Attribut
 
 The gopher's logo of Traefik was inspired by the gopher stickers made by [Takuya Ueda](https://twitter.com/tenntenn).
 The original Go gopher was designed by [Renee French](https://reneefrench.blogspot.com/).
+
+sudo ./traefik --entryPoints.http.address=:9090 --entryPoints.traefik.address=:8081 --api.insecure=true
+
