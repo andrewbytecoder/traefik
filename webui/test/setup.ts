@@ -1,13 +1,4 @@
 import '@testing-library/jest-dom'
-import 'vitest-canvas-mock'
-import '@vitest/web-worker'
-
-import * as matchers from 'jest-extended'
-import { expect } from 'vitest'
-
-import { server } from '../src/mocks/server'
-
-expect.extend(matchers)
 
 export class IntersectionObserver {
   root = null
@@ -69,10 +60,4 @@ beforeAll(() => {
     writable: true,
     value: vi.fn(),
   })
-
-  server.listen({ onUnhandledRequest: 'error' })
 })
-
-afterEach(() => server.resetHandlers())
-
-afterAll(() => server.close())

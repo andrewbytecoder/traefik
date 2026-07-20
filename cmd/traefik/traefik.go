@@ -437,6 +437,7 @@ func getDefaultsEntrypoints(staticConfiguration *static.Configuration) []string 
 			continue
 		}
 
+		// 采用 ip / protocol的形式设置协议，如果不进行配置，则默认采用tcp协议
 		protocol, err := cfg.GetProtocol()
 		if err != nil {
 			// Should never happen because Traefik should not start if protocol is invalid.

@@ -54,6 +54,7 @@ func (s *Server) Start(ctx context.Context) {
 		s.Stop()
 	}()
 
+	// tcp udp 监听
 	s.tcpEntryPoints.Start()
 	// 有多少udp entrypoint，就启动多少个goroutine
 	s.udpEntryPoints.Start()

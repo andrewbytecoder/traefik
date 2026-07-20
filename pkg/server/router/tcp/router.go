@@ -98,13 +98,14 @@ func (r *Router) HTTP3TLSConfigMatcherFunc() func(connData tcpmuxer.ConnData) (*
 	}
 }
 
-// ServeTCP forwards the connection to the right TCP/HTTP handler.
+// ServeTCP forwards the connection to the right TCP/HTTP handler.  从switcher中获取handler，然后调用handler.ServeTCP()
 func (r *Router) ServeTCP(conn tcp.WriteCloser) {
 	// Handling Non-TLS TCP connection early if there is neither HTTP(S) nor TLS routers on the entryPoint,
 	// and if there is at least one non-TLS TCP router.
 	// In the case of a non-TLS TCP client (that does not "send" first),
 	// we would block forever on clientHelloInfo,
 	// which is why we want to detect and handle that case first and foremost.
+	// 如果没有 tls http https路由，直接走tcp路由并进行处理
 	if r.muxerTCP.HasRoutes() && !r.muxerTCPTLS.HasRoutes() && !r.muxerHTTPS.HasRoutes() {
 		connData, err := tcpmuxer.NewConnData("", conn.RemoteAddr(), nil)
 		if err != nil {
@@ -113,6 +114,7 @@ func (r *Router) ServeTCP(conn tcp.WriteCloser) {
 			return
 		}
 
+		// 匹配tcp路由， 匹配上之后，将选中的路由句柄取出
 		handler, _ := r.muxerTCP.Match(connData)
 		// If there is a handler matching the connection metadata,
 		// we let it handle the connection.
@@ -122,6 +124,7 @@ func (r *Router) ServeTCP(conn tcp.WriteCloser) {
 				log.Error().Err(err).Msg("Error while setting deadline")
 			}
 
+			// 使用handler处理tcp连接数据
 			handler.ServeTCP(conn)
 			return
 		}
@@ -144,6 +147,7 @@ func (r *Router) ServeTCP(conn tcp.WriteCloser) {
 		return
 	}
 
+	// 如果是postgres协议，则处理postgres协议
 	if postgres {
 		if err := r.servePostgres(pConn); err != nil {
 			opErr, ok := errors.AsType[*net.OpError](err)
@@ -179,12 +183,15 @@ func (r *Router) ServeTCP(conn tcp.WriteCloser) {
 		return
 	}
 
+	// 如果不是tls数据
 	if !hello.isTLS {
+		// 匹配tcp路由， 匹配上之后，将选中的路由句柄取出
 		handler, _ := r.muxerTCP.Match(connData)
 		switch {
 		case handler != nil:
 			handler.ServeTCP(pConn)
 		case r.httpForwarder != nil:
+			// 如果没有匹配到tcp路由，则使用httpForwarder处理tcp连接数据
 			r.httpForwarder.ServeTCP(pConn)
 		default:
 			_ = pConn.Close()

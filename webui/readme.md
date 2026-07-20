@@ -4,37 +4,44 @@ Access to Traefik Web UI, ex: http://localhost:8080
 
 ## Interface
 
-Traefik Web UI provide 2 types of information:
+Traefik Web UI provides two main categories of information:
 
-- Providers with their backends and frontends information.
-- Health of the web server.
+- Providers together with their routed resources.
+- Health and topology information for the proxy instance.
 
 ## How to build (for backend developer)
 
 Use the Makefile :
 
 ```shell
-make build-image                # Generate Docker image.
-make clean-webui generate-webui # Generate static contents in `webui/static/` folder.
+make binary-with-webui # Rebuild Vue assets and compile a Traefik binary with embedded WebUI.
+make image-with-webui  # Rebuild Vue assets, compile the binary, and build a Docker image with embedded WebUI.
 ```
+
+## Frontend stack
+
+The current WebUI implementation uses:
+
+- [Vue 3](https://vuejs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vuetify](https://vuetifyjs.com/)
+- [Vue Router](https://router.vuejs.org/)
+- [Vite](https://vitejs.dev/)
+- [Vitest](https://vitest.dev/)
 
 ## How to build (only for frontend developer)
 
-- prerequisite: [Node 22](https://nodejs.org) [Yarn](https://yarnpkg.com/)
+- prerequisite: [Node 22](https://nodejs.org) [npm](https://www.npmjs.com/)
 
 - Go to the `webui/` directory
 
-- As we use Yarn v4, you will need to enable corepack before installing dependencies:
-
-  - `corepack enable`
-
 - To install dependencies, execute the following commands:
 
-  - `yarn install`
+  - `npm install`
 
 - Build static Web UI, execute the following command:
 
-  - `yarn build`
+  - `npm run build`
 
 - Static contents are built in the `webui/static/` directory
 
@@ -56,21 +63,20 @@ The build allows to:
 - Edit files in `webui/src/`
 - Create and populate the `.env` file using the values inside `.env.sample` file.
 - Run in development mode :
-  - `yarn dev`
-- The application will be available at `http://localhost:3000/`. On development mode, the application will run with mocked data served by [Mock Service Worker](https://mswjs.io/).
+  - `npm run dev`
+- The application will be available at `http://localhost:3000/`.
 
 ## How to run tests
 
 - Execute the following commands:
-  - `yarn test`
-  - or `yarn test:watch` if you want them in watch mode
+  - `npm run test`
+  - or `npm run test:watch` if you want them in watch mode
 
 ## Libraries
 
 - [Node](https://nodejs.org)
-- [Yarn](https://yarnpkg.com/)
-- [React](https://reactjs.org/)
+- [npm](https://www.npmjs.com/)
+- [Vue 3](https://vuejs.org/)
+- [Vuetify](https://vuetifyjs.com/)
 - [Vite](https://vitejs.dev/)
-- [Faency](https://github.com/containous/faency)
 - [Vitest](https://vitest.dev/)
-- [Mock Service Worker](https://mswjs.io/)

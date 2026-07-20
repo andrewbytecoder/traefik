@@ -40,7 +40,7 @@ func NewConnData(serverName string, remoteAddr net.Addr, alpnProtos []string) (C
 
 // Muxer defines a muxer that handles TCP routing with rules.
 type Muxer struct {
-	routes routes
+	routes routes // 绑定对应的路由
 
 	parser              predicate.Parser
 	parserV2            predicate.Parser

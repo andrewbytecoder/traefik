@@ -1,40 +1,47 @@
 import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
-import jsxA11y from 'eslint-plugin-jsx-a11y'
-import react from 'eslint-plugin-react'
-import reactHooks from 'eslint-plugin-react-hooks'
+import vuePlugin from 'eslint-plugin-vue'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import vueParser from 'vue-eslint-parser'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'static', 'src/**/*.tsx'] },
+  ...vuePlugin.configs['flat/recommended'],
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,vue}'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+      sourceType: 'module',
+    },
+  },
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+    },
+  },
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        parser: tseslint.parser,
+        extraFileExtensions: ['.vue'],
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
-    },
-    plugins: {
-      react: react,
-      'react-hooks': reactHooks,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   eslintConfigPrettier,
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,vue}'],
     extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
     rules: {
+      '@typescript-eslint/no-explicit-any': 'warn',
       'import/order': [
         'error',
         {
@@ -45,6 +52,7 @@ export default tseslint.config(
           'newlines-between': 'always',
         },
       ],
+      'vue/multi-word-component-names': 'off',
     },
     settings: {
       'import/resolver': {
@@ -53,5 +61,4 @@ export default tseslint.config(
       },
     },
   },
-  jsxA11y.flatConfigs.recommended,
 )
