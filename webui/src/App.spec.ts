@@ -3,9 +3,17 @@ import { describe, expect, test } from 'vitest'
 
 import App from './App.vue'
 import { vuetify } from './plugins/vuetify'
-import { router } from './router'
+import { resolveRouterBase, router } from './router'
 
 describe('App', () => {
+  test('detects the dashboard base path from the current URL', () => {
+    expect(resolveRouterBase('/dashboard/')).toBe('/dashboard/')
+    expect(resolveRouterBase('/dashboard/http/routers')).toBe('/dashboard/')
+    expect(resolveRouterBase('/proxy/dashboard/http/routers')).toBe('/proxy/dashboard/')
+    expect(resolveRouterBase('/dashboard')).toBe('/dashboard/')
+    expect(resolveRouterBase('/', '/custom/base')).toBe('/custom/base/')
+  })
+
   test('renders the main dashboard shell', async () => {
     vi.stubGlobal(
       'fetch',

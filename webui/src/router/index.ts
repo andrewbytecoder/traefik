@@ -24,7 +24,27 @@ import UdpServiceDetailPage from '../pages/udp/UdpServiceDetailPage.vue'
 import UdpServicesPage from '../pages/udp/UdpServicesPage.vue'
 import { resourceConfigs } from '../resource-config'
 
-const base = import.meta.env.VITE_APP_BASE_URL || ''
+export function resolveRouterBase(pathname?: string, envBase: string = import.meta.env.VITE_APP_BASE_URL || '') {
+  if (envBase) {
+    return envBase.endsWith('/') ? envBase : `${envBase}/`
+  }
+
+  const currentPathname = pathname ?? (typeof window !== 'undefined' ? window.location.pathname : '')
+
+  if (currentPathname.endsWith('/dashboard')) {
+    return `${currentPathname}/`
+  }
+
+  const dashboardMarker = '/dashboard/'
+  const dashboardIndex = currentPathname.indexOf(dashboardMarker)
+  if (dashboardIndex >= 0) {
+    return currentPathname.slice(0, dashboardIndex + dashboardMarker.length)
+  }
+
+  return '/'
+}
+
+const base = resolveRouterBase()
 
 const customCollectionPaths = new Set([
   '/http/routers',
