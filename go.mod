@@ -115,8 +115,8 @@ require (
 	k8s.io/apimachinery v0.35.2
 	k8s.io/client-go v0.35.2
 	k8s.io/utils v0.0.0-20260108192941-914a6e750570 // No tag on the repo.
-	knative.dev/networking v0.0.0-20251217020127-11890a5dabea
-	knative.dev/pkg v0.0.0-20251216153728-9c8140b780d1
+	knative.dev/networking v0.0.0-20260120131110-a7cdca238a0d
+	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a
 	mvdan.cc/xurls/v2 v2.5.0
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/gateway-api v1.5.1
