@@ -1,4 +1,4 @@
-TAG_NAME := $(shell git describe --abbrev=0 --tags --exact-match)
+TAG_NAME := $(shell git describe --abbrev=0 --tags --exact-match 2>/dev/null || true)
 SHA := $(shell git rev-parse HEAD)
 VERSION_GIT := $(if $(TAG_NAME),$(TAG_NAME),$(SHA))
 VERSION := $(if $(VERSION),$(VERSION),$(VERSION_GIT))
