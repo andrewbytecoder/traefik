@@ -44,7 +44,7 @@
     "@testing-library/jest-dom": "^6.4.2",
     "@types/node": "^22.15.18",
     "@typescript-eslint/parser": "^8.38.0",
-    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-vue": "5.2.4",
     "@vitest/coverage-v8": "^4.0.3",
     "@vue/compiler-dom": "^3.5.18",
     "@vue/test-utils": "^2.4.6",
@@ -75,6 +75,7 @@
   },
   "packageManager": "npm@10",
   "overrides": {
+    "@vitejs/plugin-vue": "5.2.4",
     "form-data": "4.0.4",
     "js-yaml": "4.1.1",
     "@csstools/css-syntax-patches-for-csstree": "1.1.4",
